@@ -35,6 +35,9 @@ lerna-debug.log*
 !.vscode/launch.json
 !.vscode/extensions.json
 
+# secrets (chứa MONGODB_URI, JWT_SECRET - không commit)
+secrets/
+
 # dotenv environment variable files
 .env
 .env.development.local
