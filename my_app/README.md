@@ -2,7 +2,7 @@
 
 Dự án thực hành 3 tuần: Backend NestJS với REST API, kết nối MongoDB qua Prisma và xác thực bằng JWT.
 
-## Nội dung đã hoàn thành theo Todo.md
+## Nội dung đã hoàn thành
 
 - **Tuần 1 – NestJS cơ bản & REST API**
   - `GET /hello` trả về `{ "message": "Hello NestJS!" }`
@@ -66,23 +66,23 @@ npm run start:dev
 
 ## Danh sách API
 
-| Method | Endpoint              | Cần token | Mô tả                         |
-| ------ | --------------------- | --------- | ----------------------------- |
-| GET    | `/hello`              | Không     | Kiểm tra server               |
-| POST   | `/auth/register`      | Không     | Đăng ký, trả về JWT           |
-| POST   | `/auth/login`         | Không     | Đăng nhập, trả về JWT         |
-| GET    | `/auth/me`            | Có        | Thông tin user từ token       |
-| POST   | `/users`              | Có        | Tạo user                      |
-| GET    | `/users`              | Có        | Danh sách user                |
-| GET    | `/users/:id`          | Có        | Chi tiết user (kèm profile, posts) |
-| PATCH  | `/users/:id`          | Có        | Cập nhật user                 |
-| DELETE | `/users/:id`          | Có        | Xóa user                      |
-| PUT    | `/users/:id/profile`  | Có        | Tạo/cập nhật profile (1-1)    |
-| POST   | `/posts`              | Có        | Tạo post (gắn với user đăng nhập) |
-| GET    | `/posts`              | Có        | Danh sách post (kèm tác giả)  |
-| GET    | `/posts/:id`          | Có        | Chi tiết post                 |
-| PATCH  | `/posts/:id`          | Có        | Cập nhật post                 |
-| DELETE | `/posts/:id`          | Có        | Xóa post                      |
+| Method | Endpoint               | Cần token | Mô tả                                 |
+| ------ | ---------------------- | ---------- | --------------------------------------- |
+| GET    | `/hello`             | Không     | Kiểm tra server                        |
+| POST   | `/auth/register`     | Không     | Đăng ký, trả về JWT                |
+| POST   | `/auth/login`        | Không     | Đăng nhập, trả về JWT              |
+| GET    | `/auth/me`           | Có        | Thông tin user từ token               |
+| POST   | `/users`             | Có        | Tạo user                               |
+| GET    | `/users`             | Có        | Danh sách user                         |
+| GET    | `/users/:id`         | Có        | Chi tiết user (kèm profile, posts)    |
+| PATCH  | `/users/:id`         | Có        | Cập nhật user                         |
+| DELETE | `/users/:id`         | Có        | Xóa user                               |
+| PUT    | `/users/:id/profile` | Có        | Tạo/cập nhật profile (1-1)           |
+| POST   | `/posts`             | Có        | Tạo post (gắn với user đăng nhập) |
+| GET    | `/posts`             | Có        | Danh sách post (kèm tác giả)        |
+| GET    | `/posts/:id`         | Có        | Chi tiết post                          |
+| PATCH  | `/posts/:id`         | Có        | Cập nhật post                         |
+| DELETE | `/posts/:id`         | Có        | Xóa post                               |
 
 Với các API cần token, thêm header: `Authorization: Bearer <accessToken>`.
 
