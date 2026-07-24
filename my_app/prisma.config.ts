@@ -6,10 +6,10 @@ import { defineConfig } from '@prisma/config';
 // thay vì file .env mặc định, để dùng chung một nguồn cấu hình với ứng dụng.
 const secretPath = join(process.cwd(), 'secrets', 'secret.json');
 const secret = JSON.parse(readFileSync(secretPath, 'utf-8')) as {
-  MONGODB_URI: string;
+  DATABASE_URL: string;
 };
 
-process.env.DATABASE_URL = secret.MONGODB_URI;
+process.env.DATABASE_URL = secret.DATABASE_URL;
 
 export default defineConfig({
   schema: join('prisma', 'schema.prisma'),

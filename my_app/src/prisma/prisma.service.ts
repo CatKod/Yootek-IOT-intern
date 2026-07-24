@@ -17,7 +17,7 @@ export class PrismaService
   constructor(config: ConfigService) {
     super({
       datasources: {
-        db: { url: config.get<string>('MONGODB_URI') },
+        db: { url: config.get<string>('DATABASE_URL') },
       },
     });
   }
@@ -25,10 +25,10 @@ export class PrismaService
   async onModuleInit(): Promise<void> {
     try {
       await this.$connect();
-      this.logger.log('Đã kết nối tới MongoDB qua Prisma');
+      this.logger.log('Đã kết nối tới PostgreSQL qua Prisma');
     } catch (error) {
       this.logger.error(
-        'Không kết nối được MongoDB. Kiểm tra lại MONGODB_URI trong .env/secret.json',
+        'Không kết nối được PostgreSQL. Kiểm tra lại DATABASE_URL trong secret.json',
         error as Error,
       );
       throw error;

@@ -1,6 +1,6 @@
-# My App - NestJS + Prisma + MongoDB
+# My App - NestJS + Prisma + PostgreSQL
 
-Dự án thực hành 3 tuần: Backend NestJS với REST API, kết nối MongoDB qua Prisma và xác thực bằng JWT.
+Dự án thực hành 3 tuần: Backend NestJS với REST API, kết nối PostgreSQL qua Prisma và xác thực bằng JWT.
 
 ## Nội dung đã hoàn thành
 
@@ -8,7 +8,7 @@ Dự án thực hành 3 tuần: Backend NestJS với REST API, kết nối Mongo
   - `GET /hello` trả về `{ "message": "Hello NestJS!" }`
   - CRUD `users` (Controller + Service)
 - **Tuần 2 – Database & hoàn thiện CRUD**
-  - Kết nối MongoDB bằng **Prisma**
+  - Kết nối PostgreSQL bằng **Prisma**
   - CRUD `users` lưu vào database
   - **Middleware log request** (`src/common/middleware/logger.middleware.ts`)
   - Cấu hình đọc từ `secrets/secret.json` qua `ConfigModule`
@@ -38,13 +38,13 @@ prisma.config.ts    # nạp connection string từ secrets/secret.json cho Prism
 
 ```json
 {
-  "MONGODB_URI": "mongodb+srv://user:<db_password>@cluster.mongodb.net/myapp?retryWrites=true&w=majority",
+  "DATABASE_URL": "postgresql://postgres:<db_password>@localhost:5432/myapp?schema=public",
   "JWT_SECRET": "chuoi-bi-mat-that-dai",
   "JWT_EXPIRES_IN": "1d"
 }
 ```
 
-> Thay `<db_password>` bằng mật khẩu MongoDB Atlas thật. Ứng dụng và Prisma CLI đều đọc chung file này.
+> Thay `<db_password>` bằng mật khẩu user PostgreSQL thật (mặc định user là `postgres`, cổng `5432`). Ứng dụng và Prisma CLI đều đọc chung file này.
 
 ## Các bước chạy
 
@@ -55,14 +55,16 @@ npm install
 # 2. Sinh Prisma Client
 npm run prisma:generate
 
-# 3. Đẩy schema lên MongoDB (tạo collection/index)
-npm run prisma:push
+# 3. Tạo database và bảng bằng migration (Prisma tự tạo database myapp nếu chưa có)
+npx prisma migrate dev --name init
 
 # 4. Chạy dev
 npm run start:dev
 ```
 
 Ứng dụng chạy tại `http://localhost:3000`.
+
+> Yêu cầu: PostgreSQL đã cài và server đang chạy. Prisma sẽ tự tạo database `myapp` nếu user có quyền `CREATEDB`. Có thể dùng `npx prisma studio` để xem dữ liệu trong 3 bảng `User`, `Profile`, `Post`.
 
 ## Danh sách API
 
