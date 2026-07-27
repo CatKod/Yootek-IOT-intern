@@ -121,6 +121,44 @@ describe('App (e2e)', () => {
     expect(response.body).not.toHaveProperty('password');
   });
 
+  // Kiểm tra module Profile 1-1: tạo/cập nhật profile gắn đúng userId.
+  it('/users/:id/profile (PUT) tạo hoặc cập nhật profile theo user', async () => {
+    const profilePayload = {
+      bio: 'Backend intern at Yootek',
+      avatar: 'https://example.com/avatar.png',
+    };
+
+    const response = await request(app.getHttpServer())
+      .put(`/users/${userId}/profile`)
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send(profilePayload)
+      .expect(200);
+
+    expect(response.body).toMatchObject({
+      userId,
+      bio: profilePayload.bio,
+      avatar: profilePayload.avatar,
+    });
+  });
+
+  it('/users (GET) trả về danh sách toàn bộ user', async () => {
+    const response = await request(app.getHttpServer())
+      .get('/users')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .expect(200);
+
+    expect(Array.isArray(response.body)).toBe(true);
+    expect(response.body).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: userId,
+          name: testUser.name,
+          email: testUser.email,
+        }),
+      ]),
+    );
+  });
+
   it('/users/:id (PATCH) cập nhật user', async () => {
     const newEmail = `updated_${Date.now()}@example.com`;
     const response = await request(app.getHttpServer())
@@ -131,6 +169,19 @@ describe('App (e2e)', () => {
 
     expect(response.body).toMatchObject({ id: userId, email: newEmail });
     testUser.email = newEmail;
+  });
+
+  // Negative test validation: thiếu field hoặc email sai định dạng phải trả 400.
+  it('/auth/register (POST) thiếu thông tin hoặc email sai định dạng trả về 400', async () => {
+    await request(app.getHttpServer())
+      .post('/auth/register')
+      .send({ name: 'Thiếu email', password: '123456' })
+      .expect(400);
+
+    await request(app.getHttpServer())
+      .post('/auth/register')
+      .send({ name: 'Email sai', email: 'invalid-email', password: '123456' })
+      .expect(400);
   });
 
   it('/posts (POST) tạo post gắn với user đăng nhập', async () => {
@@ -149,6 +200,33 @@ describe('App (e2e)', () => {
     postId = response.body.id;
   });
 
+  // Negative test validation: bỏ trống title phải trả về 400 Bad Request.
+  it('/posts (POST) thiếu title trả về 400', () => {
+    return request(app.getHttpServer())
+      .post('/posts')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({ content: 'No title' })
+      .expect(400);
+  });
+
+  it('/posts (GET) lấy danh sách tất cả bài viết', async () => {
+    const response = await request(app.getHttpServer())
+      .get('/posts')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .expect(200);
+
+    expect(Array.isArray(response.body)).toBe(true);
+    expect(response.body).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: postId,
+          title: 'Bai viet dau tien',
+          userId,
+        }),
+      ]),
+    );
+  });
+
   it('/posts/:id (GET) trả về post kèm tác giả', async () => {
     const response = await request(app.getHttpServer())
       .get(`/posts/${postId}`)
@@ -160,6 +238,42 @@ describe('App (e2e)', () => {
       title: 'Bai viet dau tien',
     });
     expect(response.body.user).toMatchObject({ id: userId });
+  });
+
+  // Cập nhật bài viết bằng PATCH cho cả title và content.
+  it('/posts/:id (PATCH) cập nhật tiêu đề hoặc nội dung bài viết', async () => {
+    const updatedPayload = {
+      title: 'Bai viet da cap nhat',
+      content: 'Noi dung da duoc chinh sua',
+    };
+
+    const response = await request(app.getHttpServer())
+      .patch(`/posts/${postId}`)
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send(updatedPayload)
+      .expect(200);
+
+    expect(response.body).toMatchObject({
+      id: postId,
+      title: updatedPayload.title,
+      content: updatedPayload.content,
+    });
+  });
+
+  // Edge case auth: email chưa tồn tại phải trả 401 Unauthorized.
+  it('/auth/login (POST) email chưa đăng ký trả về 401', () => {
+    return request(app.getHttpServer())
+      .post('/auth/login')
+      .send({ email: `unknown_${Date.now()}@example.com`, password: '123456' })
+      .expect(401);
+  });
+
+  // Edge case auth: token giả mạo hoặc không hợp lệ phải bị từ chối.
+  it('/auth/me (GET) token giả mạo trả về 401', () => {
+    return request(app.getHttpServer())
+      .get('/auth/me')
+      .set('Authorization', 'Bearer fake.invalid.token')
+      .expect(401);
   });
 
   it('/posts/:id (DELETE) xóa post', () => {
