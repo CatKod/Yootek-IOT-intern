@@ -2,12 +2,12 @@ import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { AuthModule } from './auth/auth.module';
+import { AuthModule } from './module/auth/auth.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import { loadConfiguration } from './config/configuration';
-import { PostsModule } from './posts/posts.module';
+import { PostsModule } from './module/posts/posts.module';
 import { PrismaModule } from './prisma/prisma.module';
-import { UsersModule } from './users/users.module';
+import { UsersModule } from './module/users/users.module';
 
 @Module({
   imports: [
