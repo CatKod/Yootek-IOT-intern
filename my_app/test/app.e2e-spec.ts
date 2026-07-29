@@ -14,9 +14,15 @@ describe('App (e2e)', () => {
     password: '123456',
   };
 
+  const adminLogin = {
+    email: 'admin@yootek.com',
+    password: '123456',
+  };
+
   let accessToken: string;
   let userId: string;
   let postId: string;
+  let adminToken: string;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -37,10 +43,10 @@ describe('App (e2e)', () => {
 
   afterAll(async () => {
     // Dọn dẹp: xóa user vừa tạo (cascade xóa luôn post/profile).
-    if (userId && accessToken) {
+    if (userId && adminToken) {
       await request(app.getHttpServer())
         .delete(`/users/${userId}`)
-        .set('Authorization', `Bearer ${accessToken}`);
+        .set('Authorization', `Bearer ${adminToken}`);
     }
     await app.close();
   });
@@ -50,6 +56,22 @@ describe('App (e2e)', () => {
       .get('/hello')
       .expect(200)
       .expect({ message: 'Hello NestJS!' });
+  });
+
+  // Auth: đăng nhập admin seed để test role admin cho các API nhạy cảm.
+  it('/auth/login (POST) admin login thành công', async () => {
+    const response = await request(app.getHttpServer())
+      .post('/auth/login')
+      .send(adminLogin)
+      .expect(200);
+
+    expect(response.body.accessToken).toEqual(expect.any(String));
+    expect(response.body.user).toMatchObject({
+      email: adminLogin.email,
+      role: 'admin',
+    });
+
+    adminToken = response.body.accessToken;
   });
 
   it('/users (GET) trả về 401 khi thiếu token', () => {
@@ -66,6 +88,7 @@ describe('App (e2e)', () => {
     expect(response.body.user).toMatchObject({
       name: testUser.name,
       email: testUser.email,
+      role: 'user',
     });
     expect(response.body.user.id).toEqual(expect.any(String));
     expect(response.body.user).not.toHaveProperty('password');
@@ -88,13 +111,35 @@ describe('App (e2e)', () => {
       .expect(200);
 
     expect(response.body.accessToken).toEqual(expect.any(String));
-    expect(response.body.user).toMatchObject({ email: testUser.email });
+    expect(response.body.user).toMatchObject({ email: testUser.email, role: 'user' });
   });
 
-  it('/auth/login (POST) sai mật khẩu trả về 401', () => {
+  // Negative test validation: thiếu field hoặc email sai định dạng phải trả 400.
+  it('/auth/register (POST) thiếu thông tin hoặc email sai định dạng trả về 400', async () => {
+    await request(app.getHttpServer())
+      .post('/auth/register')
+      .send({ name: 'Thiếu email', password: '123456' })
+      .expect(400);
+
+    await request(app.getHttpServer())
+      .post('/auth/register')
+      .send({ name: 'Email sai', email: 'invalid-email', password: '123456' })
+      .expect(400);
+  });
+
+  // Edge case auth: email chưa tồn tại phải trả 401 Unauthorized.
+  it('/auth/login (POST) email chưa đăng ký trả về 401', () => {
     return request(app.getHttpServer())
       .post('/auth/login')
-      .send({ email: testUser.email, password: 'sai-mat-khau' })
+      .send({ email: `unknown_${Date.now()}@example.com`, password: '123456' })
+      .expect(401);
+  });
+
+  // Edge case auth: token giả mạo hoặc không hợp lệ phải bị từ chối.
+  it('/auth/me (GET) token giả mạo trả về 401', () => {
+    return request(app.getHttpServer())
+      .get('/auth/me')
+      .set('Authorization', 'Bearer fake.invalid.token')
       .expect(401);
   });
 
@@ -144,7 +189,7 @@ describe('App (e2e)', () => {
   it('/users (GET) trả về danh sách toàn bộ user', async () => {
     const response = await request(app.getHttpServer())
       .get('/users')
-      .set('Authorization', `Bearer ${accessToken}`)
+      .set('Authorization', `Bearer ${adminToken}`)
       .expect(200);
 
     expect(Array.isArray(response.body)).toBe(true);
@@ -159,11 +204,28 @@ describe('App (e2e)', () => {
     );
   });
 
-  it('/users/:id (PATCH) cập nhật user', async () => {
+  // Role-based auth: user thường không được xem danh sách user.
+  it('/users (GET) user role bị từ chối với 403', () => {
+    return request(app.getHttpServer())
+      .get('/users')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .expect(403);
+  });
+
+  // Role-based auth: user thường không được cập nhật user khác.
+  it('/users/:id (PATCH) user role bị từ chối với 403', () => {
+    return request(app.getHttpServer())
+      .patch(`/users/${userId}`)
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({ email: `blocked_${Date.now()}@example.com` })
+      .expect(403);
+  });
+
+  it('/users/:id (PATCH) admin cập nhật user thành công', async () => {
     const newEmail = `updated_${Date.now()}@example.com`;
     const response = await request(app.getHttpServer())
       .patch(`/users/${userId}`)
-      .set('Authorization', `Bearer ${accessToken}`)
+      .set('Authorization', `Bearer ${adminToken}`)
       .send({ email: newEmail })
       .expect(200);
 
@@ -171,20 +233,8 @@ describe('App (e2e)', () => {
     testUser.email = newEmail;
   });
 
-  // Negative test validation: thiếu field hoặc email sai định dạng phải trả 400.
-  it('/auth/register (POST) thiếu thông tin hoặc email sai định dạng trả về 400', async () => {
-    await request(app.getHttpServer())
-      .post('/auth/register')
-      .send({ name: 'Thiếu email', password: '123456' })
-      .expect(400);
-
-    await request(app.getHttpServer())
-      .post('/auth/register')
-      .send({ name: 'Email sai', email: 'invalid-email', password: '123456' })
-      .expect(400);
-  });
-
-  it('/posts (POST) tạo post gắn với user đăng nhập', async () => {
+  // User role chỉ được tạo/đọc post, admin thì có toàn quyền.
+  it('/posts (POST) user role được tạo bài viết', async () => {
     const response = await request(app.getHttpServer())
       .post('/posts')
       .set('Authorization', `Bearer ${accessToken}`)
@@ -198,6 +248,15 @@ describe('App (e2e)', () => {
     });
     expect(response.body.id).toEqual(expect.any(String));
     postId = response.body.id;
+  });
+
+  // Role-based auth: user thường không được tạo user khác.
+  it('/users (POST) user role bị từ chối với 403', () => {
+    return request(app.getHttpServer())
+      .post('/users')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({ name: 'Not allowed', email: `no_${Date.now()}@example.com`, password: '123456' })
+      .expect(403);
   });
 
   // Negative test validation: bỏ trống title phải trả về 400 Bad Request.
@@ -249,7 +308,7 @@ describe('App (e2e)', () => {
 
     const response = await request(app.getHttpServer())
       .patch(`/posts/${postId}`)
-      .set('Authorization', `Bearer ${accessToken}`)
+      .set('Authorization', `Bearer ${adminToken}`)
       .send(updatedPayload)
       .expect(200);
 
@@ -260,26 +319,26 @@ describe('App (e2e)', () => {
     });
   });
 
-  // Edge case auth: email chưa tồn tại phải trả 401 Unauthorized.
-  it('/auth/login (POST) email chưa đăng ký trả về 401', () => {
+  // Role-based auth: user thường không được sửa/xóa post.
+  it('/posts/:id (PATCH) user role bị từ chối với 403', () => {
     return request(app.getHttpServer())
-      .post('/auth/login')
-      .send({ email: `unknown_${Date.now()}@example.com`, password: '123456' })
-      .expect(401);
+      .patch(`/posts/${postId}`)
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({ title: 'Khong duoc phep' })
+      .expect(403);
   });
 
-  // Edge case auth: token giả mạo hoặc không hợp lệ phải bị từ chối.
-  it('/auth/me (GET) token giả mạo trả về 401', () => {
-    return request(app.getHttpServer())
-      .get('/auth/me')
-      .set('Authorization', 'Bearer fake.invalid.token')
-      .expect(401);
-  });
-
-  it('/posts/:id (DELETE) xóa post', () => {
+  it('/posts/:id (DELETE) user role bị từ chối với 403', () => {
     return request(app.getHttpServer())
       .delete(`/posts/${postId}`)
       .set('Authorization', `Bearer ${accessToken}`)
+      .expect(403);
+  });
+
+  it('/posts/:id (DELETE) admin xóa post thành công', () => {
+    return request(app.getHttpServer())
+      .delete(`/posts/${postId}`)
+      .set('Authorization', `Bearer ${adminToken}`)
       .expect(200)
       .expect({ message: `Đã xóa post với id ${postId}` });
   });

@@ -10,37 +10,44 @@ import {
 } from '@nestjs/common';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import type { JwtPayload } from '../auth/jwt-auth.guard';
+import type { JwtPayload } from '../auth/jwt.strategy';
+import { Roles } from '../auth/roles.decorator';
+import { RolesGuard } from '../auth/roles.guard';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { PostsService } from './posts.service';
 
 @Controller('posts')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 export class PostsController {
   constructor(private readonly postsService: PostsService) {}
 
   @Post()
+  @Roles('admin', 'user')
   create(@CurrentUser() user: JwtPayload, @Body() dto: CreatePostDto) {
     return this.postsService.create(user.sub, dto);
   }
 
   @Get()
+  @Roles('admin', 'user')
   findAll() {
     return this.postsService.findAll();
   }
 
   @Get(':id')
+  @Roles('admin', 'user')
   findOne(@Param('id') id: string) {
     return this.postsService.findOne(id);
   }
 
   @Patch(':id')
+  @Roles('admin')
   update(@Param('id') id: string, @Body() dto: UpdatePostDto) {
     return this.postsService.update(id, dto);
   }
 
   @Delete(':id')
+  @Roles('admin')
   remove(@Param('id') id: string) {
     return this.postsService.remove(id);
   }

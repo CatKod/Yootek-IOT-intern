@@ -29,7 +29,7 @@ export class UsersService {
     const hashedPassword = await bcrypt.hash(dto.password, 10);
     try {
       return await this.prisma.user.create({
-        data: { ...dto, password: hashedPassword },
+        data: { ...dto, password: hashedPassword, role: 'user' },
         select: userSelect,
       });
     } catch (error) {

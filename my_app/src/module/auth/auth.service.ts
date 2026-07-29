@@ -10,6 +10,7 @@ import * as bcrypt from 'bcryptjs';
 import { PrismaService } from '../../prisma/prisma.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
+import type { Role } from './roles.decorator';
 
 @Injectable()
 export class AuthService {
@@ -33,13 +34,14 @@ export class AuthService {
         name: dto.name,
         email: dto.email,
         password: hashedPassword,
+        role: 'user',
       },
-      select: { id: true, name: true, email: true, createdAt: true },
+      select: { id: true, name: true, email: true, role: true, createdAt: true },
     });
 
     return {
       user,
-      accessToken: await this.signToken(user.id, user.email),
+      accessToken: await this.signToken(user.id, user.email, user.role),
     };
   }
 
@@ -57,14 +59,14 @@ export class AuthService {
     }
 
     return {
-      user: { id: user.id, name: user.name, email: user.email },
-      accessToken: await this.signToken(user.id, user.email),
+      user: { id: user.id, name: user.name, email: user.email, role: user.role },
+      accessToken: await this.signToken(user.id, user.email, user.role),
     };
   }
 
-  private signToken(userId: string, email: string): Promise<string> {
+  private signToken(userId: string, email: string, role: Role): Promise<string> {
     return this.jwtService.signAsync(
-      { sub: userId, email },
+      { sub: userId, email, role },
       {
         secret: this.configService.get<string>('JWT_SECRET'),
         expiresIn: this.configService.get<string>(
