@@ -6,6 +6,7 @@ import {
 import { Prisma } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
 import { PrismaService } from '../../prisma/prisma.service';
+import type { JwtPayload } from '../auth/jwt.strategy';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UpsertProfileDto } from './dto/upsert-profile.dto';
@@ -29,7 +30,7 @@ export class UsersService {
     const hashedPassword = await bcrypt.hash(dto.password, 10);
     try {
       return await this.prisma.user.create({
-        data: { ...dto, password: hashedPassword },
+        data: { ...dto, password: hashedPassword, role: 'user' },
         select: userSelect,
       });
     } catch (error) {
@@ -42,7 +43,9 @@ export class UsersService {
     return this.prisma.user.findMany({ select: userSelect });
   }
 
-  async findOne(id: string) {
+  async findOne(id: string, currentUser: JwtPayload) {
+    this.ensureOwnerOrAdmin(id, currentUser);
+
     const user = await this.prisma.user.findUnique({
       where: { id },
       select: userSelect,
@@ -80,13 +83,20 @@ export class UsersService {
   }
 
   // Quan hệ 1-1: tạo mới hoặc cập nhật profile của user.
-  async upsertProfile(id: string, dto: UpsertProfileDto) {
+  async upsertProfile(id: string, dto: UpsertProfileDto, currentUser: JwtPayload) {
+    this.ensureOwnerOrAdmin(id, currentUser);
     await this.ensureExists(id);
     return this.prisma.profile.upsert({
       where: { userId: id },
       create: { ...dto, userId: id },
       update: { ...dto },
     });
+  }
+
+  private ensureOwnerOrAdmin(id: string, currentUser: JwtPayload): void {
+    if (currentUser.role !== 'admin' && currentUser.sub !== id) {
+      throw new NotFoundException(`Không tìm thấy user với id ${id}`);
+    }
   }
 
   private async ensureExists(id: string): Promise<void> {

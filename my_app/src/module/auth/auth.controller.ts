@@ -12,7 +12,7 @@ import { CurrentUser } from './current-user.decorator';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { JwtAuthGuard } from './jwt-auth.guard';
-import type { JwtPayload } from './jwt-auth.guard';
+import type { JwtPayload } from './jwt.strategy';
 
 @Controller('auth')
 export class AuthController {
