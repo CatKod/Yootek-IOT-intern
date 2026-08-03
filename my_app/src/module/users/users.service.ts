@@ -83,7 +83,11 @@ export class UsersService {
   }
 
   // Quan hệ 1-1: tạo mới hoặc cập nhật profile của user.
-  async upsertProfile(id: string, dto: UpsertProfileDto, currentUser: JwtPayload) {
+  async upsertProfile(
+    id: string,
+    dto: UpsertProfileDto,
+    currentUser: JwtPayload,
+  ) {
     this.ensureOwnerOrAdmin(id, currentUser);
     await this.ensureExists(id);
     return this.prisma.profile.upsert({
