@@ -28,7 +28,7 @@ export class PrismaService
       this.logger.log('Đã kết nối tới PostgreSQL qua Prisma');
     } catch (error) {
       this.logger.error(
-        'Không kết nối được PostgreSQL. Kiểm tra lại DATABASE_URL trong secret.json',
+        'Không kết nối được PostgreSQL. Kiểm tra lại DATABASE_URL trong env',
         error as Error,
       );
       throw error;

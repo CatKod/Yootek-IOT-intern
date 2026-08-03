@@ -8,12 +8,12 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { AuthService } from './auth.service';
-import { CurrentUser } from './current-user.decorator';
-import { LoginDto } from './dto/login.dto';
-import { RegisterDto } from './dto/register.dto';
-import { JwtAuthGuard } from './jwt-auth.guard';
-import type { JwtPayload } from './jwt.strategy';
+import { CurrentUser } from '../current-user.decorator';
+import { LoginDto } from '../dto/login.dto';
+import { RegisterDto } from '../dto/register.dto';
+import { JwtAuthGuard } from '../guards/jwt-auth.guard';
+import { AuthService } from '../services/auth.service';
+import type { JwtPayload } from '../strategies/jwt.strategy';
 
 @ApiTags('Authentication')
 @Controller('auth')

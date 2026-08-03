@@ -6,7 +6,7 @@ import {
 import { Prisma } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
 import { PrismaService } from '../../prisma/prisma.service';
-import type { JwtPayload } from '../auth/jwt.strategy';
+import type { JwtPayload } from '../auth/strategies/jwt.strategy';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UpsertProfileDto } from './dto/upsert-profile.dto';
