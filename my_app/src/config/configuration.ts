@@ -1,25 +1,31 @@
-import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
-
 export interface AppConfig {
   DATABASE_URL: string;
   JWT_SECRET: string;
   JWT_EXPIRES_IN: string;
+  PORT: number;
 }
 
-// Nạp cấu hình từ secrets/secret.json để dùng cho ConfigModule của NestJS.
 export function loadConfiguration(): AppConfig {
-  const secretPath = join(process.cwd(), 'secrets', 'secret.json');
-  const raw = readFileSync(secretPath, 'utf-8');
-  const parsed = JSON.parse(raw) as Partial<AppConfig>;
+  const databaseUrl = process.env.DATABASE_URL;
+  const jwtSecret = process.env.JWT_SECRET;
 
-  if (!parsed.DATABASE_URL) {
-    throw new Error('Thiếu DATABASE_URL trong secrets/secret.json');
+  if (!databaseUrl) {
+    throw new Error('Thiếu biến môi trường DATABASE_URL trong file .env');
+  }
+
+  if (!jwtSecret || jwtSecret.length < 16) {
+    throw new Error('JWT_SECRET phải tồn tại và có ít nhất 16 ký tự');
+  }
+
+  const port = Number(process.env.PORT ?? 3000);
+  if (!Number.isInteger(port) || port < 1 || port > 65535) {
+    throw new Error('PORT phải là số nguyên trong khoảng 1-65535');
   }
 
   return {
-    DATABASE_URL: parsed.DATABASE_URL,
-    JWT_SECRET: parsed.JWT_SECRET ?? 'doi-thanh-mot-chuoi-bi-mat',
-    JWT_EXPIRES_IN: parsed.JWT_EXPIRES_IN ?? '1d',
+    DATABASE_URL: databaseUrl,
+    JWT_SECRET: jwtSecret,
+    JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN ?? '1d',
+    PORT: port,
   };
 }

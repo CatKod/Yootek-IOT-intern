@@ -13,7 +13,8 @@ import { UsersModule } from './module/users/users.module';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      ignoreEnvFile: true,
+      cache: true,
+      envFilePath: '.env',
       load: [loadConfiguration],
     }),
     PrismaModule,

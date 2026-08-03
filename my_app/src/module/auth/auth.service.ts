@@ -36,7 +36,13 @@ export class AuthService {
         password: hashedPassword,
         role: 'user',
       },
-      select: { id: true, name: true, email: true, role: true, createdAt: true },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        createdAt: true,
+      },
     });
 
     return {
@@ -59,12 +65,21 @@ export class AuthService {
     }
 
     return {
-      user: { id: user.id, name: user.name, email: user.email, role: user.role },
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
       accessToken: await this.signToken(user.id, user.email, user.role),
     };
   }
 
-  private signToken(userId: string, email: string, role: Role): Promise<string> {
+  private signToken(
+    userId: string,
+    email: string,
+    role: Role,
+  ): Promise<string> {
     return this.jwtService.signAsync(
       { sub: userId, email, role },
       {
