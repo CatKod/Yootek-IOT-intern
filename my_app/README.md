@@ -60,10 +60,8 @@ JWT_EXPIRES_IN="1d"
 PORT=3000
 ```
 
-<<<<<<< HEAD
-<<<<<<< Updated upstream
 > Thay `<db_password>` bằng mật khẩu user PostgreSQL thật (mặc định user là `postgres`, cổng `5432`). Ứng dụng và Prisma CLI đều đọc chung file này.
-=======
+
 `ConfigModule` dùng `.env` cho ứng dụng NestJS và Prisma CLI. Không commit file `.env` vì file này chứa thông tin nhạy cảm. `DATABASE_URL` là bắt buộc, `JWT_SECRET` phải có ít nhất 16 ký tự và `PORT` phải nằm trong khoảng 1-65535. Ứng dụng sẽ dừng khởi động nếu cấu hình không hợp lệ.
 
 ### Swagger
@@ -83,7 +81,9 @@ http://localhost:3000/api
 5. Sử dụng **Try it out** để gọi các endpoint Users và Posts.
 
 Swagger hiển thị các nhóm `Health`, `Authentication`, `Users` và `Posts`, cùng mô tả request body và ví dụ dữ liệu cho các DTO.
->>>>>>> Stashed changes
+=======
+`ConfigModule` dùng `.env` cho ứng dụng NestJS và Prisma CLI. Không commit file `.env` vì file này chứa thông tin nhạy cảm. Swagger khả dụng tại `http://localhost:3000/api` sau khi ứng dụng khởi động.
+>>>>>>> c87a52eb7f5f64e53048eafb23eef107dd456818
 =======
 `ConfigModule` dùng `.env` cho ứng dụng NestJS và Prisma CLI. Không commit file `.env` vì file này chứa thông tin nhạy cảm. Swagger khả dụng tại `http://localhost:3000/api` sau khi ứng dụng khởi động.
 >>>>>>> c87a52eb7f5f64e53048eafb23eef107dd456818
