@@ -1,6 +1,6 @@
 # My App - NestJS + Prisma + PostgreSQL
 
-Dự án thực hành 3 tuần: Backend NestJS với REST API, kết nối PostgreSQL qua Prisma và xác thực bằng JWT.
+Dự án thực hành 4 tuần: Backend NestJS với REST API, kết nối PostgreSQL qua Prisma, xác thực bằng JWT và phân quyền theo vai trò.
 
 ## Nội dung đã hoàn thành
 
@@ -17,6 +17,13 @@ Dự án thực hành 3 tuần: Backend NestJS với REST API, kết nối Postg
   - Hash mật khẩu bằng `bcryptjs`
   - `POST /auth/register`, `POST /auth/login` trả về **JWT**
   - **Guard kiểm tra token** (`JwtAuthGuard`) bảo vệ các API `users`, `posts`
+- **Tuần 4 – Passport, Guard & Role-based Authentication**
+  - Tích hợp **Passport** với `passport-jwt` và `JwtStrategy`
+  - Sử dụng `JwtAuthGuard` để xác thực Bearer token
+  - Xây dựng `RolesGuard` và decorator `@Roles()`
+  - Phân quyền `admin` và `user`
+  - User chỉ có thể tạo và đọc bài viết
+  - Admin có thể cập nhật và xóa bài viết
 
 ## Cấu trúc thư mục chính
 
