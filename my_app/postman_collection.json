@@ -139,7 +139,7 @@
                 "header": [{ "key": "Content-Type", "value": "application/json" }],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \\\"name\\\": \\\"Other User\\\",\n  \\\"email\\\": \\\"{{otherUserEmail}}\\\",\n  \\\"password\\\": \\\"{{otherUserPassword}}\\\"\n}"
+                  "raw": "{\n  \"name\": \"Other User\",\n  \"email\": \"{{otherUserEmail}}\",\n  \"password\": \"{{otherUserPassword}}\"\n}"
                 },
                 "url": { "raw": "{{baseUrl}}/auth/register", "host": ["{{baseUrl}}"], "path": ["auth", "register"] }
               }
@@ -210,7 +210,27 @@
           "item": [
             {
               "name": "GET /auth/me - user success",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "const res = pm.response.json();",
+                      "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                      "pm.test('Returns current user identity', () => {",
+                      "  pm.expect(res).to.have.property('userId', pm.collectionVariables.get('userId'));",
+                      "  pm.expect(res).to.have.property('email', pm.collectionVariables.get('userEmail'));",
+                      "});"
+                    ]
+                  }
+                }
+              ],
               "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [{ "key": "token", "value": "{{userToken}}", "type": "string" }]
+                },
                 "method": "GET",
                 "header": [],
                 "url": { "raw": "{{baseUrl}}/auth/me", "host": ["{{baseUrl}}"], "path": ["auth", "me"] }
