@@ -9,6 +9,8 @@ import {
   Put,
   UseGuards,
 } from '@nestjs/common';
+import { CurrentUser } from '../auth/current-user.decorator';
+import type { JwtPayload } from '../auth/jwt.strategy';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { Roles } from '../auth/roles.decorator';
 import { RolesGuard } from '../auth/roles.guard';
@@ -36,8 +38,8 @@ export class UsersController {
 
   @Get(':id')
   @Roles('admin', 'user')
-  findOne(@Param('id') id: string) {
-    return this.usersService.findOne(id);
+  findOne(@Param('id') id: string, @CurrentUser() currentUser: JwtPayload) {
+    return this.usersService.findOne(id, currentUser);
   }
 
   @Patch(':id')
@@ -54,7 +56,11 @@ export class UsersController {
 
   @Put(':id/profile')
   @Roles('admin', 'user')
-  upsertProfile(@Param('id') id: string, @Body() dto: UpsertProfileDto) {
-    return this.usersService.upsertProfile(id, dto);
+  upsertProfile(
+    @Param('id') id: string,
+    @Body() dto: UpsertProfileDto,
+    @CurrentUser() currentUser: JwtPayload,
+  ) {
+    return this.usersService.upsertProfile(id, dto, currentUser);
   }
 }

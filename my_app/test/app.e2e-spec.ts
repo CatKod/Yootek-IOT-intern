@@ -23,6 +23,7 @@ describe('App (e2e)', () => {
   let userId: string;
   let postId: string;
   let adminToken: string;
+  let otherUserId: string;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -43,10 +44,14 @@ describe('App (e2e)', () => {
 
   afterAll(async () => {
     // Dọn dẹp: xóa user vừa tạo (cascade xóa luôn post/profile).
-    if (userId && adminToken) {
-      await request(app.getHttpServer())
-        .delete(`/users/${userId}`)
-        .set('Authorization', `Bearer ${adminToken}`);
+    if (adminToken) {
+      for (const id of [userId, otherUserId]) {
+        if (id) {
+          await request(app.getHttpServer())
+            .delete(`/users/${id}`)
+            .set('Authorization', `Bearer ${adminToken}`);
+        }
+      }
     }
     await app.close();
   });
@@ -183,6 +188,46 @@ describe('App (e2e)', () => {
       userId,
       bio: profilePayload.bio,
       avatar: profilePayload.avatar,
+    });
+  });
+
+  it('/users/:id (GET) user không được xem user khác', async () => {
+    const response = await request(app.getHttpServer())
+      .post('/users')
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({
+        name: 'Other User',
+        email: `other_${Date.now()}@example.com`,
+        password: '123456',
+      })
+      .expect(201);
+
+    otherUserId = response.body.id;
+
+    await request(app.getHttpServer())
+      .get(`/users/${otherUserId}`)
+      .set('Authorization', `Bearer ${accessToken}`)
+      .expect(404);
+  });
+
+  it('/users/:id/profile (PUT) user không được cập nhật profile user khác', async () => {
+    await request(app.getHttpServer())
+      .put(`/users/${otherUserId}/profile`)
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({ bio: 'Unauthorized profile update' })
+      .expect(404);
+  });
+
+  it('/users/:id/profile (PUT) admin được cập nhật profile user khác', async () => {
+    const response = await request(app.getHttpServer())
+      .put(`/users/${otherUserId}/profile`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({ bio: 'Updated by admin' })
+      .expect(200);
+
+    expect(response.body).toMatchObject({
+      userId: otherUserId,
+      bio: 'Updated by admin',
     });
   });
 

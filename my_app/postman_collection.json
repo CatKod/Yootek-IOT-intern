@@ -10,6 +10,10 @@
     { "key": "userPassword", "value": "123456" },
     { "key": "userToken", "value": "" },
     { "key": "userId", "value": "" },
+    { "key": "otherUserEmail", "value": "" },
+    { "key": "otherUserPassword", "value": "123456" },
+    { "key": "otherUserToken", "value": "" },
+    { "key": "otherUserId", "value": "" },
     { "key": "postId", "value": "" },
     { "key": "adminEmail", "value": "admin@yootek.com" },
     { "key": "adminPassword", "value": "123456" },
@@ -40,6 +44,15 @@
               "name": "POST /auth/register - success",
               "event": [
                 {
+                  "listen": "prerequest",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.collectionVariables.set('userEmail', `user_${Date.now()}@example.com`);"
+                    ]
+                  }
+                },
+                {
                   "listen": "test",
                   "script": {
                     "type": "text/javascript",
@@ -59,7 +72,7 @@
                 "header": [{ "key": "Content-Type", "value": "application/json" }],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"name\": \"Nguyen Van A\",\n  \"email\": \"user@example.com\",\n  \"password\": \"123456\"\n}"
+                  "raw": "{\n  \"name\": \"Nguyen Van A\",\n  \"email\": \"{{userEmail}}\",\n  \"password\": \"123456\"\n}"
                 },
                 "url": { "raw": "{{baseUrl}}/auth/register", "host": ["{{baseUrl}}"], "path": ["auth", "register"] }
               }
@@ -86,6 +99,47 @@
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"name\": \"Invalid Email\",\n  \"email\": \"abc\",\n  \"password\": \"123456\"\n}"
+                },
+                "url": { "raw": "{{baseUrl}}/auth/register", "host": ["{{baseUrl}}"], "path": ["auth", "register"] }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Register Other User",
+          "item": [
+            {
+              "name": "POST /auth/register - other user",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.collectionVariables.set('otherUserEmail', `other_${Date.now()}@example.com`);"
+                    ]
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "const res = pm.response.json();",
+                      "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                      "if (res.accessToken) pm.collectionVariables.set('otherUserToken', res.accessToken);",
+                      "if (res.user && res.user.id) pm.collectionVariables.set('otherUserId', res.user.id);"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "auth": { "type": "noauth" },
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \\\"name\\\": \\\"Other User\\\",\n  \\\"email\\\": \\\"{{otherUserEmail}}\\\",\n  \\\"password\\\": \\\"{{otherUserPassword}}\\\"\n}"
                 },
                 "url": { "raw": "{{baseUrl}}/auth/register", "host": ["{{baseUrl}}"], "path": ["auth", "register"] }
               }
@@ -225,7 +279,20 @@
           }
         },
         {
-          "name": "PUT /users/:id/profile - upsert profile",
+          "name": "GET /users/:id - 404 user cannot read another user",
+          "event": [{
+            "listen": "test",
+            "script": {"type": "text/javascript", "exec": ["pm.test('Status 404', () => pm.response.to.have.status(404));"]}
+          }],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/users/{{otherUserId}}", "host": ["{{baseUrl}}"], "path": ["users", "{{otherUserId}}"]}
+          }
+        },
+        {
+          "name": "PUT /users/:id/profile - upsert own profile",
+
           "request": {
             "method": "PUT",
             "header": [{ "key": "Content-Type", "value": "application/json" }],
@@ -238,6 +305,19 @@
               "host": ["{{baseUrl}}"],
               "path": ["users", "{{userId}}", "profile"]
             }
+          }
+        },
+        {
+          "name": "PUT /users/:id/profile - 404 cannot update another profile",
+          "event": [{
+            "listen": "test",
+            "script": {"type": "text/javascript", "exec": ["pm.test('Status 404', () => pm.response.to.have.status(404));"]}
+          }],
+          "request": {
+            "method": "PUT",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"bio\": \"Should not be updated\"\n}"},
+            "url": {"raw": "{{baseUrl}}/users/{{otherUserId}}/profile", "host": ["{{baseUrl}}"], "path": ["users", "{{otherUserId}}", "profile"]}
           }
         },
         {
@@ -303,6 +383,19 @@
             "method": "GET",
             "header": [],
             "url": { "raw": "{{baseUrl}}/users", "host": ["{{baseUrl}}"], "path": ["users"] }
+          }
+        },
+        {
+          "name": "PUT /users/:id/profile - admin can update another profile",
+          "event": [{
+            "listen": "test",
+            "script": {"type": "text/javascript", "exec": ["pm.test('Status 200', () => pm.response.to.have.status(200));"]}
+          }],
+          "request": {
+            "method": "PUT",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"bio\": \"Updated by admin\",\n  \"avatar\": \"https://example.com/admin-avatar.png\"\n}"},
+            "url": {"raw": "{{baseUrl}}/users/{{userId}}/profile", "host": ["{{baseUrl}}"], "path": ["users", "{{userId}}", "profile"]}
           }
         },
         {
