@@ -29,9 +29,9 @@ Dự án thực hành 4 tuần: Backend NestJS với REST API, kết nối Postg
 
 ```
 src/
-├─ auth/            # Đăng ký, đăng nhập, JWT, guard
-├─ users/           # CRUD user + profile (1-1)
-├─ posts/           # CRUD post (1-n với user)
+├─ module/auth/     # Đăng ký, đăng nhập, JWT, guard
+├─ module/users/    # CRUD user + profile (1-1)
+├─ module/posts/    # CRUD post (1-n với user)
 ├─ prisma/          # PrismaService (kết nối DB)
 ├─ common/middleware/logger.middleware.ts
 ├─ config/configuration.ts   # đọc secrets/secret.json
@@ -41,17 +41,18 @@ prisma/schema.prisma
 prisma.config.ts    # nạp connection string từ secrets/secret.json cho Prisma CLI
 ```
 
-## Cấu hình (secrets/secret.json)
+## Cấu hình biến môi trường
 
-```json
-{
-  "DATABASE_URL": "postgresql://postgres:<db_password>@localhost:5432/myapp?schema=public",
-  "JWT_SECRET": "chuoi-bi-mat-that-dai",
-  "JWT_EXPIRES_IN": "1d"
-}
+Sao chép `.env.example` thành `.env`, sau đó thay các giá trị phù hợp:
+
+```env
+DATABASE_URL="postgresql://postgres:<db_password>@localhost:5432/myapp?schema=public"
+JWT_SECRET="mot-chuoi-bi-mat-it-nhat-16-ky-tu"
+JWT_EXPIRES_IN="1d"
+PORT=3000
 ```
 
-> Thay `<db_password>` bằng mật khẩu user PostgreSQL thật (mặc định user là `postgres`, cổng `5432`). Ứng dụng và Prisma CLI đều đọc chung file này.
+`ConfigModule` dùng `.env` cho ứng dụng NestJS và Prisma CLI. Không commit file `.env` vì file này chứa thông tin nhạy cảm. Swagger khả dụng tại `http://localhost:3000/api` sau khi ứng dụng khởi động.
 
 ## Các bước chạy
 
@@ -62,8 +63,8 @@ npm install
 # 2. Sinh Prisma Client
 npm run prisma:generate
 
-# 3. Tạo database và bảng bằng migration (Prisma tự tạo database myapp nếu chưa có)
-npx prisma migrate dev --name init
+# 3. Áp dụng các migration đã có
+npx prisma migrate deploy
 
 # 4. Chạy dev
 npm run start:dev

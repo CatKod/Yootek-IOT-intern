@@ -116,7 +116,10 @@ describe('App (e2e)', () => {
       .expect(200);
 
     expect(response.body.accessToken).toEqual(expect.any(String));
-    expect(response.body.user).toMatchObject({ email: testUser.email, role: 'user' });
+    expect(response.body.user).toMatchObject({
+      email: testUser.email,
+      role: 'user',
+    });
   });
 
   // Negative test validation: thiếu field hoặc email sai định dạng phải trả 400.
@@ -300,7 +303,11 @@ describe('App (e2e)', () => {
     return request(app.getHttpServer())
       .post('/users')
       .set('Authorization', `Bearer ${accessToken}`)
-      .send({ name: 'Not allowed', email: `no_${Date.now()}@example.com`, password: '123456' })
+      .send({
+        name: 'Not allowed',
+        email: `no_${Date.now()}@example.com`,
+        password: '123456',
+      })
       .expect(403);
   });
 
