@@ -8,6 +8,7 @@ import { loadConfiguration } from './config/configuration';
 import { PostsModule } from './module/posts/posts.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { UsersModule } from './module/users/users.module';
+import { MqttModule } from './infrastructure/mqtt';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { UsersModule } from './module/users/users.module';
     AuthModule,
     UsersModule,
     PostsModule,
+    MqttModule,
   ],
   controllers: [AppController],
   providers: [AppService],

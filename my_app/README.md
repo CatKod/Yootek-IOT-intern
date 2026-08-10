@@ -1,154 +1,234 @@
-# My App - NestJS + Prisma + PostgreSQL
+# My App - NestJS + Prisma + PostgreSQL + MQTT + Socket.IO
 
-Dự án thực hành 5 tuần: Backend NestJS với REST API, PostgreSQL qua Prisma, xác thực JWT, phân quyền theo vai trò, tài liệu Swagger và cấu hình bằng `.env`.
+Dự án thực hành backend NestJS đã đi tới **tuần 6** với các phần chính:
 
-## Nội dung đã hoàn thành
+- REST API với NestJS
+- PostgreSQL qua Prisma
+- Authentication JWT + phân quyền theo role
+- Swagger
+- MQTT để giao tiếp với ESP32
+- Socket.IO để đẩy dữ liệu realtime tới client
+- Microservice transport trong NestJS
 
-- **Tuần 1 – NestJS cơ bản & REST API**
-  - `GET /hello` trả về `{ "message": "Hello NestJS!" }`
-  - CRUD `users` (Controller + Service)
-- **Tuần 2 – Database & hoàn thiện CRUD**
-  - Kết nối PostgreSQL bằng **Prisma**
-  - CRUD `users` lưu vào database
-  - **Middleware log request** (`src/common/middleware/logger.middleware.ts`)
-  - Cấu hình biến môi trường bằng `.env` và `ConfigModule`
-- **Tuần 3 – Prisma, quan hệ & Authentication**
-  - Model `User`, `Profile` (quan hệ **1-1**), `Post` (quan hệ **1-n**)
-  - Hash mật khẩu bằng `bcryptjs`
-  - `POST /auth/register`, `POST /auth/login` trả về **JWT**
-  - **Guard kiểm tra token** (`JwtAuthGuard`) bảo vệ các API `users`, `posts`
-- **Tuần 4 – Passport, Guard & Role-based Authentication**
-  - Tích hợp **Passport** với `passport-jwt` và `JwtStrategy`
-  - Sử dụng `JwtAuthGuard` để xác thực Bearer token
-  - Xây dựng `RolesGuard` và decorator `@Roles()`
-  - Phân quyền `admin` và `user`
-  - User chỉ có thể tạo và đọc bài viết
-  - Admin có thể cập nhật và xóa bài viết
-- **Tuần 5 – Swagger và cấu hình môi trường**
-  - Tài liệu API Swagger tại `http://localhost:3000/api`
-  - Swagger UI hỗ trợ Bearer JWT bằng nút `Authorize`
-  - Bổ sung mô tả và ví dụ request cho các DTO bằng `@ApiProperty()`
-  - Đọc `DATABASE_URL`, `JWT_SECRET`, `JWT_EXPIRES_IN` và `PORT` từ `.env`
-  - Kiểm tra biến môi trường bắt buộc khi ứng dụng khởi động
-  - Prisma CLI và NestJS dùng chung cấu hình từ `.env`
+## Trạng thái hiện tại theo tuần
+
+### Tuần 1 – NestJS cơ bản & REST API
+- `GET /hello` để kiểm tra server
+- CRUD `users` cơ bản
+
+### Tuần 2 – Database & CRUD với Prisma
+- Kết nối PostgreSQL bằng Prisma
+- CRUD `users` lưu xuống database
+- Middleware log request
+- Cấu hình biến môi trường bằng `.env`
+
+### Tuần 3 – Authentication & quan hệ dữ liệu
+- Model `User`, `Profile`, `Post`
+- Hash mật khẩu bằng `bcryptjs`
+- `POST /auth/register`, `POST /auth/login` trả về JWT
+- Bảo vệ API bằng `JwtAuthGuard`
+
+### Tuần 4 – Passport, Guard & Role-based Authentication
+- Tích hợp `passport-jwt`
+- `RolesGuard` và decorator `@Roles()`
+- Phân quyền `admin` và `user`
+- User chỉ đọc/tạo bài viết, admin có quyền quản lý đầy đủ hơn
+
+### Tuần 5 – Swagger & cấu hình môi trường
+- Swagger tại `http://localhost:3000/api`
+- Hỗ trợ `Authorize` với Bearer token
+- DTO có `@ApiProperty()`
+- Đọc cấu hình từ `.env`
+
+### Tuần 6 – Microservice, MQTT, Socket.IO
+- Kết nối MQTT broker miễn phí HiveMQ
+- Nhận dữ liệu từ ESP32 qua MQTT topic
+- Publish command ngược về ESP32 qua MQTT
+- Broadcast dữ liệu realtime qua Socket.IO
+- Bật `Transport.MQTT` trong Nest microservice
+- Tách phần MQTT vào `src/infrastructure/mqtt`
+
+## Luồng MQTT hiện tại
+
+ESP32 của bạn đang dùng các topic sau:
+
+- Sensor data: `esp32/sensors/data`
+- Command: `esp32/control/command`
+- ACK: `esp32/control/ack`
+
+Luồng xử lý:
+
+- `ESP32 -> MQTT Broker -> NestJS -> Socket.IO -> FE/Postman`
+- `API -> NestJS -> MQTT Broker -> ESP32`
 
 ## Cấu trúc thư mục chính
 
-```
+```text
 src/
-├─ module/auth/     # Đăng ký, đăng nhập, JWT, guard
-├─ module/users/    # CRUD user + profile (1-1)
-├─ module/posts/    # CRUD post (1-n với user)
-├─ prisma/          # PrismaService (kết nối DB)
+├─ infrastructure/
+│  └─ mqtt/
+│     ├─ controllers/
+│     ├─ dto/
+│     ├─ gateways/
+│     ├─ services/
+│     ├─ constants/
+│     ├─ mqtt.module.ts
+│     ├─ mqtt.types.ts
+│     └─ index.ts
+├─ module/auth/
+├─ module/users/
+├─ module/posts/
+├─ prisma/
 ├─ common/middleware/logger.middleware.ts
-├─ config/configuration.ts   # kiểm tra và nạp cấu hình từ .env
+├─ config/configuration.ts
 ├─ app.module.ts
-└─ main.ts                  # bootstrap app và cấu hình Swagger
-prisma/schema.prisma
-prisma.config.ts             # nạp dotenv cho Prisma CLI
-.env.example                 # mẫu biến môi trường
+└─ main.ts
 ```
 
 ## Cấu hình biến môi trường
 
-Sao chép `.env.example` thành `.env`, sau đó thay các giá trị phù hợp:
+Sao chép `.env.example` thành `.env` rồi chỉnh lại giá trị phù hợp:
 
 ```env
 DATABASE_URL="postgresql://postgres:<db_password>@localhost:5432/myapp?schema=public"
 JWT_SECRET="mot-chuoi-bi-mat-it-nhat-16-ky-tu"
 JWT_EXPIRES_IN="1d"
 PORT=3000
+MQTT_BROKER_URL="mqtt://broker.hivemq.com:1883"
+MQTT_SENSOR_TOPIC="esp32/sensors/data"
+MQTT_COMMAND_TOPIC="esp32/control/command"
+MQTT_ACK_TOPIC="esp32/control/ack"
 ```
 
-> Thay `<db_password>` bằng mật khẩu user PostgreSQL thật (mặc định user là `postgres`, cổng `5432`). Ứng dụng và Prisma CLI đều đọc chung file này.
-
-`ConfigModule` dùng `.env` cho ứng dụng NestJS và Prisma CLI. Không commit file `.env` vì file này chứa thông tin nhạy cảm. `DATABASE_URL` là bắt buộc, `JWT_SECRET` phải có ít nhất 16 ký tự và `PORT` phải nằm trong khoảng 1-65535. Ứng dụng sẽ dừng khởi động nếu cấu hình không hợp lệ.
-
-### Swagger
-
-Sau khi chạy ứng dụng, mở:
-
-```text
-http://localhost:3000/api
-```
-
-Để kiểm thử các API cần đăng nhập:
-
-1. Gọi `POST /auth/register` để tạo tài khoản.
-2. Gọi `POST /auth/login` và sao chép `accessToken`.
-3. Bấm **Authorize** trên Swagger.
-4. Nhập `Bearer <accessToken>` rồi bấm **Authorize**.
-5. Sử dụng **Try it out** để gọi các endpoint Users và Posts.
-
-Swagger hiển thị các nhóm `Health`, `Authentication`, `Users` và `Posts`, cùng mô tả request body và ví dụ dữ liệu cho các DTO.
-`ConfigModule` dùng `.env` cho ứng dụng NestJS và Prisma CLI. Không commit file `.env` vì file này chứa thông tin nhạy cảm. Swagger khả dụng tại `http://localhost:3000/api` sau khi ứng dụng khởi động.
-
-## Các bước chạy
+## Chạy dự án
 
 ```bash
-# 1. Cài dependencies
 npm install
-
-# 2. Sinh Prisma Client
 npm run prisma:generate
-
-# 3. Áp dụng các migration đã có
 npx prisma migrate deploy
-
-# 4. Chạy dev
 npm run start:dev
 ```
 
-Ứng dụng chạy tại `http://localhost:3000`.
+Ứng dụng chạy tại:
 
-> Yêu cầu: PostgreSQL đã cài, server PostgreSQL đang chạy và database trong `DATABASE_URL` đã tồn tại hoặc tài khoản PostgreSQL có quyền tạo database. Có thể dùng `npx prisma studio` để xem dữ liệu trong 3 bảng `User`, `Profile`, `Post`.
+- `http://localhost:3000`
+- Swagger: `http://localhost:3000/api`
 
-## Danh sách API
+## API MQTT hiện có
 
-| Method | Endpoint               | Cần token | Mô tả                                 |
-| ------ | ---------------------- | ---------- | --------------------------------------- |
-| GET    | `/hello`             | Không     | Kiểm tra server                        |
-| POST   | `/auth/register`     | Không     | Đăng ký, trả về JWT                |
-| POST   | `/auth/login`        | Không     | Đăng nhập, trả về JWT              |
-| GET    | `/auth/me`           | Có        | Thông tin user từ token               |
-| POST   | `/users`             | Có        | Tạo user                               |
-| GET    | `/users`             | Có        | Danh sách user                         |
-| GET    | `/users/:id`         | Có        | Chi tiết user (kèm profile, posts)    |
-| PATCH  | `/users/:id`         | Có        | Cập nhật user                         |
-| DELETE | `/users/:id`         | Có        | Xóa user                               |
-| PUT    | `/users/:id/profile` | Có        | Tạo/cập nhật profile (1-1)           |
-| POST   | `/posts`             | Có        | Tạo post (gắn với user đăng nhập) |
-| GET    | `/posts`             | Có        | Danh sách post (kèm tác giả)        |
-| GET    | `/posts/:id`         | Có        | Chi tiết post                          |
-| PATCH  | `/posts/:id`         | Có        | Cập nhật post                         |
-| DELETE | `/posts/:id`         | Có        | Xóa post                               |
+| Method | Endpoint | Mô tả |
+| --- | --- | --- |
+| GET | `/mqtt/status` | Xem trạng thái MQTT broker và topics |
+| POST | `/mqtt/publish` | Publish payload lên MQTT broker |
 
-Với các API cần token, thêm header: `Authorization: Bearer <accessToken>`.
+### Ví dụ body `POST /mqtt/publish`
 
-## Kiểm tra phân quyền
+Gửi command xuống ESP32:
 
-- Role `user` có thể tạo và đọc bài viết.
-- Role `admin` có thể tạo, đọc, cập nhật và xóa bài viết.
-- Các API Users được bảo vệ bằng JWT và `RolesGuard`; một số thao tác yêu cầu role `admin`.
-- Không có token hợp lệ sẽ nhận `401 Unauthorized`.
-- Có token nhưng không đủ quyền sẽ nhận `403 Forbidden`.
-
-## Ví dụ test nhanh (Postman/curl)
-
-```bash
-# Đăng ký
-curl -X POST http://localhost:3000/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{"name":"Nguyen Van A","email":"a@example.com","password":"123456"}'
-
-# Đăng nhập -> lấy accessToken
-curl -X POST http://localhost:3000/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email":"a@example.com","password":"123456"}'
-
-# Tạo post (thay <TOKEN>)
-curl -X POST http://localhost:3000/posts \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer <TOKEN>" \
-  -d '{"title":"Bai viet dau tien","content":"Xin chao"}'
+```json
+{
+  "topic": "esp32/control/command",
+  "payload": {
+    "command": "toggle",
+    "value": 1,
+    "source": "postman"
+  },
+  "retain": false,
+  "qos": 0
+}
 ```
+
+Giả lập ESP32 gửi sensor data:
+
+```json
+{
+  "topic": "esp32/sensors/data",
+  "payload": {
+    "id": 11,
+    "packet_no": 126,
+    "temperature": 30,
+    "humidity": 60,
+    "tds": 1100,
+    "pH": 5.0
+  },
+  "retain": false,
+  "qos": 0
+}
+```
+
+## Cách test MQTT bằng Postman
+
+Mình đã gộp sẵn phần hỗ trợ MQTT vào file collection:
+
+- `postman_collection.json` – collection chính, chỉ còn HTTP
+- `postman_week6_collection.json` – collection riêng cho tuần 6
+
+### 1) Test HTTP MQTT
+
+Import `postman_week6_collection.json`, rồi chạy:
+
+- `GET /mqtt/status`
+- `POST /mqtt/publish`
+
+### 2) Test realtime Socket.IO trong Postman
+
+Lưu ý quan trọng
+
+- **Socket.IO không nên import từ JSON collection như request HTTP**.
+- Nên **tạo thủ công trong Postman** để chắc chắn đúng loại request.
+
+Các bước:
+
+1. Mở Postman
+2. Chọn **New**
+3. Chọn **Socket.IO request** nếu Postman của bạn có hỗ trợ
+4. Nhập URL:
+
+```text
+socketio://localhost:3000/mqtt
+```
+
+5. Kết nối vào namespace `/mqtt`
+6. Sau khi connect, server sẽ đẩy các event:
+   - `mqtt-status`
+   - `mqtt-message`
+
+7. Mở request HTTP `POST /mqtt/publish`
+8. Gửi sensor data hoặc command
+9. Quan sát dữ liệu realtime trong tab Socket.IO
+
+### Nếu Postman không hỗ trợ Socket.IO request
+
+Một số phiên bản Postman không tạo được Socket.IO request từ collection JSON. Nếu gặp tình huống này:
+
+- tạo request Socket.IO thủ công trong UI
+- hoặc test realtime bằng MQTTX + frontend / client riêng
+
+## Cách test bằng MQTTX
+
+Dùng các thông số sau:
+
+- Broker: `mqtt://broker.hivemq.com:1883`
+- Subscribe:
+  - `esp32/sensors/data`
+  - `esp32/control/command`
+  - `esp32/control/ack`
+
+Payload mẫu ESP32:
+
+```json
+{
+  "id": 11,
+  "packet_no": 126,
+  "temperature": 30,
+  "humidity": 60,
+  "tds": 1100,
+  "pH": 5.0
+}
+```
+
+## Ghi chú quan trọng cho tuần 6
+
+- Topic trong NestJS đã được đồng bộ với `ESP32_SendData`
+- `mqtt/status` trả về topic hiện tại để bạn đối chiếu nhanh
+- Phần realtime socket là **Socket.IO namespace `/mqtt`**, không phải WebSocket thuần

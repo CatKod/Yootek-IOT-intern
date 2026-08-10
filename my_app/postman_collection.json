@@ -1,23 +1,78 @@
 {
   "info": {
     "name": "My App - Passport JWT + Role Based Auth",
-    "description": "Bo API test cho Postman voi 2 luong rieng biet: User va Admin. Co san request cho cac truong hop bi tu choi 401/403 de test thu cong.",
+    "description": "Bo API test cho Postman voi 2 luong rieng biet: User va Admin. Co san request cho cac truong hop bi tu choi 401/403 de test thu cong.\n\nWeek 6 IoT: da dong bo topic voi ESP32_SendData va chua luong HTTP test MQTT.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
-    { "key": "baseUrl", "value": "http://localhost:3000" },
-    { "key": "userEmail", "value": "" },
-    { "key": "userPassword", "value": "123456" },
-    { "key": "userToken", "value": "" },
-    { "key": "userId", "value": "" },
-    { "key": "otherUserEmail", "value": "" },
-    { "key": "otherUserPassword", "value": "123456" },
-    { "key": "otherUserToken", "value": "" },
-    { "key": "otherUserId", "value": "" },
-    { "key": "postId", "value": "" },
-    { "key": "adminEmail", "value": "admin@yootek.com" },
-    { "key": "adminPassword", "value": "123456" },
-    { "key": "adminToken", "value": "" }
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000"
+    },
+    {
+      "key": "userEmail",
+      "value": ""
+    },
+    {
+      "key": "userPassword",
+      "value": "123456"
+    },
+    {
+      "key": "userToken",
+      "value": ""
+    },
+    {
+      "key": "userId",
+      "value": ""
+    },
+    {
+      "key": "otherUserEmail",
+      "value": ""
+    },
+    {
+      "key": "otherUserPassword",
+      "value": "123456"
+    },
+    {
+      "key": "otherUserToken",
+      "value": ""
+    },
+    {
+      "key": "otherUserId",
+      "value": ""
+    },
+    {
+      "key": "postId",
+      "value": ""
+    },
+    {
+      "key": "adminEmail",
+      "value": "admin@yootek.com"
+    },
+    {
+      "key": "adminPassword",
+      "value": "123456"
+    },
+    {
+      "key": "adminToken",
+      "value": ""
+    },
+    {
+      "key": "mqttBrokerUrl",
+      "value": "mqtt://broker.hivemq.com:1883"
+    },
+    {
+      "key": "sensorTopic",
+      "value": "esp32/sensors/data"
+    },
+    {
+      "key": "commandTopic",
+      "value": "esp32/control/command"
+    },
+    {
+      "key": "ackTopic",
+      "value": "esp32/control/ack"
+    }
   ],
   "item": [
     {
@@ -26,10 +81,20 @@
         {
           "name": "GET /hello",
           "request": {
-            "auth": { "type": "noauth" },
+            "auth": {
+              "type": "noauth"
+            },
             "method": "GET",
             "header": [],
-            "url": { "raw": "{{baseUrl}}/hello", "host": ["{{baseUrl}}"], "path": ["hello"] }
+            "url": {
+              "raw": "{{baseUrl}}/hello",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "hello"
+              ]
+            }
           }
         }
       ]
@@ -67,40 +132,88 @@
                 }
               ],
               "request": {
-                "auth": { "type": "noauth" },
+                "auth": {
+                  "type": "noauth"
+                },
                 "method": "POST",
-                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"name\": \"Nguyen Van A\",\n  \"email\": \"{{userEmail}}\",\n  \"password\": \"123456\"\n}"
                 },
-                "url": { "raw": "{{baseUrl}}/auth/register", "host": ["{{baseUrl}}"], "path": ["auth", "register"] }
+                "url": {
+                  "raw": "{{baseUrl}}/auth/register",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "auth",
+                    "register"
+                  ]
+                }
               }
             },
             {
               "name": "POST /auth/register - 400 missing field",
               "request": {
-                "auth": { "type": "noauth" },
+                "auth": {
+                  "type": "noauth"
+                },
                 "method": "POST",
-                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"name\": \"Missing Email\",\n  \"password\": \"123456\"\n}"
                 },
-                "url": { "raw": "{{baseUrl}}/auth/register", "host": ["{{baseUrl}}"], "path": ["auth", "register"] }
+                "url": {
+                  "raw": "{{baseUrl}}/auth/register",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "auth",
+                    "register"
+                  ]
+                }
               }
             },
             {
               "name": "POST /auth/register - 400 invalid email",
               "request": {
-                "auth": { "type": "noauth" },
+                "auth": {
+                  "type": "noauth"
+                },
                 "method": "POST",
-                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"name\": \"Invalid Email\",\n  \"email\": \"abc\",\n  \"password\": \"123456\"\n}"
                 },
-                "url": { "raw": "{{baseUrl}}/auth/register", "host": ["{{baseUrl}}"], "path": ["auth", "register"] }
+                "url": {
+                  "raw": "{{baseUrl}}/auth/register",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "auth",
+                    "register"
+                  ]
+                }
               }
             }
           ]
@@ -134,14 +247,30 @@
                 }
               ],
               "request": {
-                "auth": { "type": "noauth" },
+                "auth": {
+                  "type": "noauth"
+                },
                 "method": "POST",
-                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"name\": \"Other User\",\n  \"email\": \"{{otherUserEmail}}\",\n  \"password\": \"{{otherUserPassword}}\"\n}"
                 },
-                "url": { "raw": "{{baseUrl}}/auth/register", "host": ["{{baseUrl}}"], "path": ["auth", "register"] }
+                "url": {
+                  "raw": "{{baseUrl}}/auth/register",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "auth",
+                    "register"
+                  ]
+                }
               }
             }
           ]
@@ -167,40 +296,88 @@
                 }
               ],
               "request": {
-                "auth": { "type": "noauth" },
+                "auth": {
+                  "type": "noauth"
+                },
                 "method": "POST",
-                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"email\": \"{{userEmail}}\",\n  \"password\": \"{{userPassword}}\"\n}"
                 },
-                "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }
+                "url": {
+                  "raw": "{{baseUrl}}/auth/login",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "auth",
+                    "login"
+                  ]
+                }
               }
             },
             {
               "name": "POST /auth/login - 401 unknown email",
               "request": {
-                "auth": { "type": "noauth" },
+                "auth": {
+                  "type": "noauth"
+                },
                 "method": "POST",
-                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"email\": \"unknown@example.com\",\n  \"password\": \"123456\"\n}"
                 },
-                "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }
+                "url": {
+                  "raw": "{{baseUrl}}/auth/login",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "auth",
+                    "login"
+                  ]
+                }
               }
             },
             {
               "name": "POST /auth/login - 401 wrong password",
               "request": {
-                "auth": { "type": "noauth" },
+                "auth": {
+                  "type": "noauth"
+                },
                 "method": "POST",
-                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"email\": \"{{userEmail}}\",\n  \"password\": \"wrong-password\"\n}"
                 },
-                "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }
+                "url": {
+                  "raw": "{{baseUrl}}/auth/login",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "auth",
+                    "login"
+                  ]
+                }
               }
             }
           ]
@@ -229,19 +406,48 @@
               "request": {
                 "auth": {
                   "type": "bearer",
-                  "bearer": [{ "key": "token", "value": "{{userToken}}", "type": "string" }]
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{userToken}}",
+                      "type": "string"
+                    }
+                  ]
                 },
                 "method": "GET",
                 "header": [],
-                "url": { "raw": "{{baseUrl}}/auth/me", "host": ["{{baseUrl}}"], "path": ["auth", "me"] }
+                "url": {
+                  "raw": "{{baseUrl}}/auth/me",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "auth",
+                    "me"
+                  ]
+                }
               }
             },
             {
               "name": "GET /auth/me - 401 invalid token",
               "request": {
                 "method": "GET",
-                "header": [{ "key": "Authorization", "value": "Bearer fake.invalid.token" }],
-                "url": { "raw": "{{baseUrl}}/auth/me", "host": ["{{baseUrl}}"], "path": ["auth", "me"] }
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer fake.invalid.token"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/auth/me",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "auth",
+                    "me"
+                  ]
+                }
               }
             }
           ]
@@ -265,14 +471,30 @@
                 }
               ],
               "request": {
-                "auth": { "type": "noauth" },
+                "auth": {
+                  "type": "noauth"
+                },
                 "method": "POST",
-                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\"\n}"
                 },
-                "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }
+                "url": {
+                  "raw": "{{baseUrl}}/auth/login",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "auth",
+                    "login"
+                  ]
+                }
               }
             }
           ]
@@ -283,7 +505,13 @@
       "name": "Users - User flow",
       "auth": {
         "type": "bearer",
-        "bearer": [{ "key": "token", "value": "{{userToken}}", "type": "string" }]
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{userToken}}",
+            "type": "string"
+          }
+        ]
       },
       "item": [
         {
@@ -293,51 +521,107 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/users/{{userId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["users", "{{userId}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "{{userId}}"
+              ]
             }
           }
         },
         {
           "name": "GET /users/:id - 404 user cannot read another user",
-          "event": [{
-            "listen": "test",
-            "script": {"type": "text/javascript", "exec": ["pm.test('Status 404', () => pm.response.to.have.status(404));"]}
-          }],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [],
-            "url": {"raw": "{{baseUrl}}/users/{{otherUserId}}", "host": ["{{baseUrl}}"], "path": ["users", "{{otherUserId}}"]}
+            "url": {
+              "raw": "{{baseUrl}}/users/{{otherUserId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "{{otherUserId}}"
+              ]
+            }
           }
         },
         {
           "name": "PUT /users/:id/profile - upsert own profile",
-
           "request": {
             "method": "PUT",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"bio\": \"Backend intern\",\n  \"avatar\": \"https://example.com/avatar.png\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/users/{{userId}}/profile",
-              "host": ["{{baseUrl}}"],
-              "path": ["users", "{{userId}}", "profile"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "{{userId}}",
+                "profile"
+              ]
             }
           }
         },
         {
           "name": "PUT /users/:id/profile - 404 cannot update another profile",
-          "event": [{
-            "listen": "test",
-            "script": {"type": "text/javascript", "exec": ["pm.test('Status 404', () => pm.response.to.have.status(404));"]}
-          }],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "PUT",
-            "header": [{"key": "Content-Type", "value": "application/json"}],
-            "body": {"mode": "raw", "raw": "{\n  \"bio\": \"Should not be updated\"\n}"},
-            "url": {"raw": "{{baseUrl}}/users/{{otherUserId}}/profile", "host": ["{{baseUrl}}"], "path": ["users", "{{otherUserId}}", "profile"]}
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bio\": \"Should not be updated\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/{{otherUserId}}/profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "{{otherUserId}}",
+                "profile"
+              ]
+            }
           }
         },
         {
@@ -345,34 +629,65 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": { "raw": "{{baseUrl}}/users", "host": ["{{baseUrl}}"], "path": ["users"] }
+            "url": {
+              "raw": "{{baseUrl}}/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users"
+              ]
+            }
           }
         },
         {
           "name": "POST /users - 403 user forbidden",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"name\": \"Not Allowed\",\n  \"email\": \"forbidden@example.com\",\n  \"password\": \"123456\"\n}"
             },
-            "url": { "raw": "{{baseUrl}}/users", "host": ["{{baseUrl}}"], "path": ["users"] }
+            "url": {
+              "raw": "{{baseUrl}}/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users"
+              ]
+            }
           }
         },
         {
           "name": "PATCH /users/:id - 403 user forbidden",
           "request": {
             "method": "PATCH",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"name\": \"Should Fail\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/users/{{userId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["users", "{{userId}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "{{userId}}"
+              ]
             }
           }
         },
@@ -383,8 +698,13 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/users/{{userId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["users", "{{userId}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "{{userId}}"
+              ]
             }
           }
         }
@@ -394,7 +714,13 @@
       "name": "Users - Admin flow",
       "auth": {
         "type": "bearer",
-        "bearer": [{ "key": "token", "value": "{{adminToken}}", "type": "string" }]
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{adminToken}}",
+            "type": "string"
+          }
+        ]
       },
       "item": [
         {
@@ -402,35 +728,78 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": { "raw": "{{baseUrl}}/users", "host": ["{{baseUrl}}"], "path": ["users"] }
+            "url": {
+              "raw": "{{baseUrl}}/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users"
+              ]
+            }
           }
         },
         {
           "name": "PUT /users/:id/profile - admin can update another profile",
-          "event": [{
-            "listen": "test",
-            "script": {"type": "text/javascript", "exec": ["pm.test('Status 200', () => pm.response.to.have.status(200));"]}
-          }],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "PUT",
-            "header": [{"key": "Content-Type", "value": "application/json"}],
-            "body": {"mode": "raw", "raw": "{\n  \"bio\": \"Updated by admin\",\n  \"avatar\": \"https://example.com/admin-avatar.png\"\n}"},
-            "url": {"raw": "{{baseUrl}}/users/{{userId}}/profile", "host": ["{{baseUrl}}"], "path": ["users", "{{userId}}", "profile"]}
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bio\": \"Updated by admin\",\n  \"avatar\": \"https://example.com/admin-avatar.png\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/{{userId}}/profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "{{userId}}",
+                "profile"
+              ]
+            }
           }
         },
         {
           "name": "PATCH /users/:id - admin update user",
           "request": {
             "method": "PATCH",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"name\": \"User updated by admin\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/users/{{userId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["users", "{{userId}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "{{userId}}"
+              ]
             }
           }
         },
@@ -441,8 +810,13 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/users/{{userId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["users", "{{userId}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "{{userId}}"
+              ]
             }
           }
         }
@@ -452,7 +826,13 @@
       "name": "Posts - User flow",
       "auth": {
         "type": "bearer",
-        "bearer": [{ "key": "token", "value": "{{userToken}}", "type": "string" }]
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{userToken}}",
+            "type": "string"
+          }
+        ]
       },
       "item": [
         {
@@ -471,24 +851,50 @@
           ],
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"title\": \"Bai viet dau tien\",\n  \"content\": \"Noi dung bai viet\"\n}"
             },
-            "url": { "raw": "{{baseUrl}}/posts", "host": ["{{baseUrl}}"], "path": ["posts"] }
+            "url": {
+              "raw": "{{baseUrl}}/posts",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "posts"
+              ]
+            }
           }
         },
         {
           "name": "POST /posts - 400 missing title",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"content\": \"No title\"\n}"
             },
-            "url": { "raw": "{{baseUrl}}/posts", "host": ["{{baseUrl}}"], "path": ["posts"] }
+            "url": {
+              "raw": "{{baseUrl}}/posts",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "posts"
+              ]
+            }
           }
         },
         {
@@ -496,7 +902,15 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": { "raw": "{{baseUrl}}/posts", "host": ["{{baseUrl}}"], "path": ["posts"] }
+            "url": {
+              "raw": "{{baseUrl}}/posts",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "posts"
+              ]
+            }
           }
         },
         {
@@ -506,8 +920,13 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/posts/{{postId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["posts", "{{postId}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "posts",
+                "{{postId}}"
+              ]
             }
           }
         },
@@ -515,15 +934,25 @@
           "name": "PATCH /posts/:id - 403 user forbidden",
           "request": {
             "method": "PATCH",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"title\": \"User cannot update\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/posts/{{postId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["posts", "{{postId}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "posts",
+                "{{postId}}"
+              ]
             }
           }
         },
@@ -534,8 +963,13 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/posts/{{postId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["posts", "{{postId}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "posts",
+                "{{postId}}"
+              ]
             }
           }
         }
@@ -545,22 +979,38 @@
       "name": "Posts - Admin flow",
       "auth": {
         "type": "bearer",
-        "bearer": [{ "key": "token", "value": "{{adminToken}}", "type": "string" }]
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{adminToken}}",
+            "type": "string"
+          }
+        ]
       },
       "item": [
         {
           "name": "PATCH /posts/:id - admin update post",
           "request": {
             "method": "PATCH",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"title\": \"Admin updated title\",\n  \"content\": \"Admin updated content\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/posts/{{postId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["posts", "{{postId}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "posts",
+                "{{postId}}"
+              ]
             }
           }
         },
@@ -571,10 +1021,185 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/posts/{{postId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["posts", "{{postId}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "posts",
+                "{{postId}}"
+              ]
             }
           }
+        }
+      ]
+    },
+    {
+      "name": "Week 6 IoT",
+      "item": [
+        {
+          "name": "HTTP Flow",
+          "item": [
+            {
+              "name": "GET /mqtt/status",
+              "request": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/mqtt/status",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "mqtt",
+                    "status"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                      "const res = pm.response.json();",
+                      "pm.expect(res).to.have.property('connected');",
+                      "pm.expect(res).to.have.property('brokerUrl');",
+                      "pm.expect(res).to.have.property('sensorTopic');",
+                      "pm.expect(res).to.have.property('commandTopic');",
+                      "pm.expect(res).to.have.property('ackTopic');"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "POST /mqtt/publish - command to ESP32",
+              "request": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"topic\": \"{{commandTopic}}\",\n  \"payload\": {\n    \"action\": \"toggle\",\n    \"value\": 1,\n    \"source\": \"postman\"\n  },\n  \"retain\": false,\n  \"qos\": 0\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/mqtt/publish",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "mqtt",
+                    "publish"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 200/201', () => pm.expect([200, 201]).to.include(pm.response.code));",
+                      "const res = pm.response.json();",
+                      "pm.expect(res).to.have.property('message');",
+                      "pm.expect(res.topic).to.eql(pm.collectionVariables.get('commandTopic'));"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "POST /mqtt/publish - simulate ESP32 sensor data",
+              "request": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"topic\": \"{{sensorTopic}}\",\n  \"payload\": {\n    \"id\": 11,\n    \"packet_no\": 126,\n    \"temperature\": 30,\n    \"humidity\": 60,\n    \"tds\": 1100,\n    \"pH\": 5.0\n  },\n  \"retain\": false,\n  \"qos\": 0\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/mqtt/publish",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "mqtt",
+                    "publish"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 200/201', () => pm.expect([200, 201]).to.include(pm.response.code));",
+                      "const res = pm.response.json();",
+                      "pm.expect(res.topic).to.eql(pm.collectionVariables.get('sensorTopic'));"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "MQTTX Manual Notes",
+          "item": [
+            {
+              "name": "Subscribe Topics Checklist",
+              "request": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/mqtt/status",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "mqtt",
+                    "status"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "console.log('MQTT broker:', pm.collectionVariables.get('mqttBrokerUrl'));",
+                      "console.log('Subscribe to:', pm.collectionVariables.get('sensorTopic'), pm.collectionVariables.get('commandTopic'), pm.collectionVariables.get('ackTopic'));",
+                      "console.log('Topics are aligned with ESP32_SendData now.');"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
         }
       ]
     }
