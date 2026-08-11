@@ -4,9 +4,6 @@ export interface AppConfig {
   JWT_EXPIRES_IN: string;
   PORT: number;
   MQTT_BROKER_URL: string;
-  MQTT_SENSOR_TOPIC: string;
-  MQTT_COMMAND_TOPIC: string;
-  MQTT_ACK_TOPIC: string;
 }
 
 export function loadConfiguration(): AppConfig {
@@ -31,9 +28,6 @@ export function loadConfiguration(): AppConfig {
     JWT_SECRET: jwtSecret,
     JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN ?? '1d',
     PORT: port,
-    MQTT_BROKER_URL: process.env.MQTT_BROKER_URL ?? 'mqtt://broker.hivemq.com:1883',
-    MQTT_SENSOR_TOPIC: process.env.MQTT_SENSOR_TOPIC ?? 'esp32/sensors/data',
-    MQTT_COMMAND_TOPIC: process.env.MQTT_COMMAND_TOPIC ?? 'esp32/control/command',
-    MQTT_ACK_TOPIC: process.env.MQTT_ACK_TOPIC ?? 'esp32/control/ack',
+    MQTT_BROKER_URL: process.env.MQTT_BROKER_URL ?? 'mqtt://broker.hivemq.com:1883'
   };
 }
