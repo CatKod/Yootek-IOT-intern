@@ -1,0 +1,101 @@
+generator client {
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  admin
+  user
+}
+
+model User {
+  id        String    @id @default(cuid())
+  name      String
+  email     String    @unique
+  password  String
+  role      Role      @default(user)
+  gardens   Garden[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Garden {
+  id          String        @id @default(cuid())
+  name        String
+  description String?
+  ownerId     String
+  owner       User          @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  vegetables  Vegetable[]
+  sales       Sale[]
+  sensorData  SensorData[]
+  led1State   String        @default("Off")
+  led2State   String        @default("Off")
+  led3State   String        @default("Off")
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@index([ownerId])
+}
+
+model Vegetable {
+  id               String            @id @default(cuid())
+  name             String
+  importedQuantity Int               @default(0)
+  soldQuantity     Int               @default(0)
+  currentPrice     Decimal?          @db.Decimal(12, 2)
+  gardenId         String
+  garden           Garden            @relation(fields: [gardenId], references: [id], onDelete: Cascade)
+  prices           VegetablePrice[]
+  sales            Sale[]
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+
+  @@unique([gardenId, name])
+  @@index([gardenId])
+}
+
+model VegetablePrice {
+  id          String    @id @default(cuid())
+  vegetableId String
+  vegetable   Vegetable @relation(fields: [vegetableId], references: [id], onDelete: Cascade)
+  price       Decimal   @db.Decimal(12, 2)
+  effectiveAt DateTime  @default(now())
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([vegetableId, effectiveAt])
+}
+
+model Sale {
+  id          String    @id @default(cuid())
+  gardenId    String
+  vegetableId String
+  quantity    Int
+  unitPrice   Decimal   @db.Decimal(12, 2)
+  totalAmount Decimal   @db.Decimal(12, 2)
+  soldAt      DateTime  @default(now())
+  garden      Garden    @relation(fields: [gardenId], references: [id], onDelete: Cascade)
+  vegetable   Vegetable @relation(fields: [vegetableId], references: [id], onDelete: Restrict)
+
+  @@index([gardenId, soldAt])
+  @@index([vegetableId, soldAt])
+}
+
+model SensorData {
+  id         String   @id @default(cuid())
+  gardenId   String
+  garden     Garden   @relation(fields: [gardenId], references: [id], onDelete: Cascade)
+  deviceId   String?
+  packetNo   Int?
+  temperature Float
+  humidity   Float
+  payload    Json?
+  receivedAt DateTime @default(now())
+
+  @@index([gardenId, receivedAt])
+}

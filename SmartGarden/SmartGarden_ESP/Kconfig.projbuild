@@ -1,0 +1,79 @@
+menu "SmartGarden Configuration"
+
+    config WIFI_SSID
+        string "Wi-Fi SSID"
+        default "YOUR_WIFI_SSID"
+        help
+            Tên của mạng Wi-Fi mà ESP32 sẽ kết nối tới.
+
+    config WIFI_PASSWORD
+        string "Wi-Fi Password"
+        default "YOUR_WIFI_PASSWORD"
+        help
+            Mật khẩu của mạng Wi-Fi.
+
+    config MQTT_BROKER_URI
+        string "MQTT Broker URI"
+        default "mqtt://broker.hivemq.com:1883"
+        help
+            URI của MQTT broker, ví dụ mqtt://broker.hivemq.com:1883
+
+    config GARDEN_ID
+        string "Garden ID"
+        default "1"
+        help
+            ID của khu vườn trong hệ thống SmartGarden (khớp với gardenId trên backend).
+
+    config USER_ID
+        string "User ID"
+        default "1"
+        help
+            ID người dùng sở hữu khu vườn.
+
+    config MQTT_SENSOR_TOPIC
+        string "MQTT Sensor Topic"
+        default "smart-garden/sensors"
+        help
+            Topic để publish dữ liệu cảm biến.
+
+    config MQTT_COMMAND_TOPIC
+        string "MQTT Command Topic"
+        default "smart-garden/commands"
+        help
+            Topic để nhận lệnh bật/tắt đèn từ backend.
+
+    config MQTT_ACK_TOPIC
+        string "MQTT ACK Topic"
+        default "smart-garden/ack"
+        help
+            Topic để gửi ACK xác nhận đã nhận lệnh.
+
+    config MQTT_STATUS_TOPIC
+        string "MQTT Status Topic"
+        default "smart-garden/status"
+        help
+            Topic để publish trạng thái đèn hiện tại.
+
+    config SENSOR_PUBLISH_INTERVAL_MS
+        int "Sensor publish interval (ms)"
+        default 5000
+        range 1000 3600000
+        help
+            Chu kỳ publish dữ liệu cảm biến (miligiây).
+
+    config LED_RED_GPIO
+        int "Red LED GPIO"
+        default 2
+        range 0 48
+
+    config LED_YELLOW_GPIO
+        int "Yellow LED GPIO"
+        default 4
+        range 0 48
+
+    config LED_GREEN_GPIO
+        int "Green LED GPIO"
+        default 5
+        range 0 48
+
+endmenu
