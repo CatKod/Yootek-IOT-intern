@@ -48,8 +48,8 @@ export class GardensController {
   @Get(':id/revenue')
   @Roles('admin', 'user')
   @ApiOperation({ summary: 'Doanh thu của một khu vườn' })
-  revenue(@Param('id') id: string, @Query('range') range: 'day' | 'week' | 'month' = 'day') {
-    return this.gardensService.getRevenue(id, range);
+  revenue(@Param('id') id: string, @CurrentUser() user: AuthUser, @Query('range') range: 'day' | 'week' | 'month' = 'day') {
+    return this.gardensService.getRevenue(id, user.sub, user.role, range);
   }
 
   @Patch(':id')

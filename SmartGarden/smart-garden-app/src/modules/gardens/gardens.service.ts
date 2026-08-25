@@ -97,7 +97,9 @@ export class GardensService {
     return updated;
   }
 
-  async getRevenue(gardenId: string, range: 'day' | 'week' | 'month') {
+  async getRevenue(gardenId: string, ownerId: string, role: Role, range: 'day' | 'week' | 'month') {
+    await this.ensureAccessible(gardenId, ownerId, role);
+
     const since = this.getRangeStart(range);
 
     const sales = await this.prisma.sale.findMany({

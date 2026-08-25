@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { type Role } from '../../common/types/role.type';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreatePriceDto } from './dto/create-price.dto';
@@ -40,14 +40,14 @@ export class VegetablesService {
       typeof dto.soldQuantity === 'number' &&
       dto.soldQuantity > dto.importedQuantity
     ) {
-      throw new Error('Số lượng bán ra không được vượt quá số lượng nhập vào');
+      throw new BadRequestException('Số lượng bán ra không được vượt quá số lượng nhập vào');
     }
 
     const currentImported = dto.importedQuantity ?? vegetable.importedQuantity;
     const currentSold = dto.soldQuantity ?? vegetable.soldQuantity;
 
     if (currentSold > currentImported) {
-      throw new Error('Số lượng bán ra không được vượt quá số lượng nhập vào');
+      throw new BadRequestException('Số lượng bán ra không được vượt quá số lượng nhập vào');
     }
 
     return this.prisma.vegetable.update({
@@ -60,12 +60,12 @@ export class VegetablesService {
     const vegetable = await this.ensureVegetableAccess(id, ownerId, role);
 
     if (!vegetable.currentPrice) {
-      throw new Error('Rau chưa có giá bán, vui lòng nhập giá trước');
+      throw new BadRequestException('Rau chưa có giá bán, vui lòng nhập giá trước');
     }
 
     const newSoldQuantity = vegetable.soldQuantity + quantity;
     if (newSoldQuantity > vegetable.importedQuantity) {
-      throw new Error('Số lượng bán ra vượt quá số lượng nhập vào');
+      throw new BadRequestException('Số lượng bán ra vượt quá số lượng nhập vào');
     }
 
     const unitPrice = Number(vegetable.currentPrice);
@@ -117,7 +117,7 @@ export class VegetablesService {
     });
 
     if (!latestPrice) {
-      throw new Error('Rau này chưa có giá để cập nhật');
+      throw new NotFoundException('Rau này chưa có giá để cập nhật');
     }
 
     return this.prisma.vegetablePrice.update({
@@ -134,10 +134,23 @@ export class VegetablesService {
     });
 
     if (!latestPrice) {
-      throw new Error('Rau này chưa có giá để xóa');
+      throw new NotFoundException('Rau này chưa có giá để xóa');
     }
 
-    await this.prisma.vegetablePrice.delete({ where: { id: latestPrice.id } });
+    await this.prisma.$transaction(async (tx) => {
+      await tx.vegetablePrice.delete({ where: { id: latestPrice.id } });
+
+      const nextLatestPrice = await tx.vegetablePrice.findFirst({
+        where: { vegetableId: vegetable.id },
+        orderBy: { effectiveAt: 'desc' },
+      });
+
+      await tx.vegetable.update({
+        where: { id: vegetable.id },
+        data: { currentPrice: nextLatestPrice ? nextLatestPrice.price : null },
+      });
+    });
+
     return { message: 'Đã xóa giá rau thành công' };
   }
 
@@ -148,16 +161,20 @@ export class VegetablesService {
       orderBy: { effectiveAt: 'desc' },
     });
 
+    if (!latestPrice) {
+      throw new NotFoundException('Rau này chưa có giá');
+    }
+
     return latestPrice;
   }
 
   private async ensureGardenAccess(gardenId: string, ownerId: string, role: Role) {
     const garden = await this.prisma.garden.findUnique({ where: { id: gardenId } });
     if (!garden) {
-      throw new Error('Không tìm thấy khu vườn');
+      throw new NotFoundException('Không tìm thấy khu vườn');
     }
     if (role !== 'admin' && garden.ownerId !== ownerId) {
-      throw new Error('Bạn không có quyền thao tác trên khu vườn này');
+      throw new ForbiddenException('Bạn không có quyền thao tác trên khu vườn này');
     }
   }
 
@@ -168,11 +185,11 @@ export class VegetablesService {
     });
 
     if (!vegetable) {
-      throw new Error(`Không tìm thấy vegetable ${id}`);
+      throw new NotFoundException(`Không tìm thấy vegetable ${id}`);
     }
 
     if (role !== 'admin' && vegetable.garden.ownerId !== ownerId) {
-      throw new Error('Bạn không có quyền thao tác trên loại rau này');
+      throw new ForbiddenException('Bạn không có quyền thao tác trên loại rau này');
     }
 
     return vegetable;
